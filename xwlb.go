@@ -5,6 +5,7 @@ import (
 	"github.com/gocolly/colly/v2"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var xwlbUrlFormat = "https://tv.cctv.com/lm/xwlb/day/%s.shtml"
@@ -13,7 +14,7 @@ type XwlbData struct {
 	Title   string
 	Content string
 	SrcUrl  string
-	PubTime int64
+	PubTime time.Time
 }
 
 type XwlbDatas []*XwlbData
@@ -25,8 +26,13 @@ func (ds XwlbDatas) fetchContent() error {
 		i, _ := strconv.Atoi(e.Request.URL.Fragment)
 		ds[i].Content, _ = e.DOM.Html()
 	})
-	spider.OnHTML("", func(e *colly.HTMLElement) {
-		
+	spider.OnHTML("#chbox01 .text_box_02", func(e *colly.HTMLElement) {
+		i, _ := strconv.Atoi(e.Request.URL.Fragment)
+		ss := strings.Split(e.ChildTexts("p")[1], "：")
+		ds[i].PubTime, _ = time.Parse("2006年01月02日 15:04", ss[1])
+	})
+	spider.OnError(func(resp *colly.Response, err error) {
+		es.add(fmt.Errorf("status code: %d, err = %#v", resp.StatusCode, err))
 	})
 	for i, d := range ds {
 		frame := fmt.Sprintf("#%d", i)
