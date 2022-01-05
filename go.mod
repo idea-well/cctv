@@ -1,4 +1,4 @@
-module cctv
+module github.com/idea-well/cctv
 
 go 1.16
 
