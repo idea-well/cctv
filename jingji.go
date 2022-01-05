@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type jingJiRes struct {
@@ -22,6 +23,11 @@ type JingJiData struct {
 	Content string `json:"content"`    // 新闻内容
 	SrcUrl  string `json:"url"`        // 新闻链接
 	PubTime string `json:"focus_date"` // 发布时间
+}
+
+func (j *JingJiData) PubTimeFormat(layout string) string {
+	t, _ := time.Parse("2006-01-02 15:04:05", j.PubTime)
+	return t.Format(layout)
 }
 
 type JingJiDatas []*JingJiData
