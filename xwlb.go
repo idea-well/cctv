@@ -58,5 +58,8 @@ func XWLB(date string) (XwlbDatas, error) {
 		es.add(fmt.Errorf("status code: %d, err = %#v", resp.StatusCode, err))
 	})
 	es.add(spider.Visit(fmt.Sprintf(xwlbUrlFormat, date)))
-	return ds[1:], callWithOutErr(es.first(), ds[1:].fetchContent)
+	if len(ds) > 0 {
+		ds = ds[1:] // remove the first item
+	}
+	return ds, callWithOutErr(es.first(), ds.fetchContent)
 }
