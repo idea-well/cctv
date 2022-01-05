@@ -5,7 +5,8 @@ import "github.com/gocolly/colly/v2"
 func newSpider(async bool) *colly.Collector {
 	c := colly.NewCollector()
 	c.Async = async
-	c.IgnoreRobotsTxt = false
+	// cctv没有robots.txt
+	c.IgnoreRobotsTxt = true
 	return c
 }
 
