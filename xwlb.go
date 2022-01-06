@@ -21,6 +21,7 @@ type XwlbDatas []*XwlbData
 
 func (ds XwlbDatas) fetchContent() error {
 	var es = make(errors, 0)
+	var lock = make(chan struct{}, 5)
 	spider := newSpider(true)
 	spider.OnHTML("#about_txt .cnt_bd", func(e *colly.HTMLElement) {
 		i, _ := strconv.Atoi(e.Request.URL.Fragment)
@@ -34,7 +35,9 @@ func (ds XwlbDatas) fetchContent() error {
 	spider.OnError(func(resp *colly.Response, err error) {
 		es.add(fmt.Errorf("status code: %d, err = %#v", resp.StatusCode, err))
 	})
+	spider.OnResponse(func(_ *colly.Response) { <-lock })
 	for i, d := range ds {
+		lock <- struct{}{}
 		frame := fmt.Sprintf("#%d", i)
 		es.add(spider.Visit(d.SrcUrl + frame))
 	}

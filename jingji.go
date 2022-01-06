@@ -43,6 +43,7 @@ func (ds JingJiDatas) sliceFrom(id string) JingJiDatas {
 
 func (ds JingJiDatas) fetchContent() error {
 	var es = make(errors, 0)
+	var lock = make(chan struct{}, 5)
 	spider := newSpider(true)
 	spider.OnHTML("#content_area", func(e *colly.HTMLElement) {
 		i, _ := strconv.Atoi(e.Request.URL.Fragment)
@@ -51,7 +52,9 @@ func (ds JingJiDatas) fetchContent() error {
 	spider.OnError(func(resp *colly.Response, err error) {
 		es.add(fmt.Errorf("status code: %d, err = %#v", resp.StatusCode, err))
 	})
+	spider.OnResponse(func(_ *colly.Response) { <-lock })
 	for i := range ds {
+		lock <- struct{}{}
 		frame := fmt.Sprintf("#%d", i)
 		es.add(spider.Visit(ds[i].SrcUrl + frame))
 	}
